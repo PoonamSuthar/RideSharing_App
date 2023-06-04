@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E1DADA"
+    tools:context=".Dashboard">
+
+
+    <Button
+        android:id="@+id/driver_button"
+        android:layout_width="289dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="159dp"
+        android:backgroundTint="#E4D339"
+        android:fontFamily="sans-serif-black"
+        android:text="I'm a Driver"
+        android:textColor="#222020"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toTopOf="@id/rider_button"
+        app:layout_constraintEnd_toEndOf="@+id/rider_button"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/rider_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.921" />
+
+    <Button
+        android:id="@+id/rider_button"
+        android:layout_width="289dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="158dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="159dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#E4D339"
+        android:fontFamily="sans-serif-black"
+        android:text="I'm a Rider"
+        android:textColor="#222020"
+        android:textSize="26sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.924" />
+
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="418dp"
+        android:layout_height="75dp"
+        android:background="#E4D339"
+        android:backgroundTint="#E4D339"
+        android:fontFamily="@font/almendra"
+        android:text="RideSharing"
+        android:textAlignment="center"
+        android:textColor="#20201E"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="508dp"
+        android:layout_height="646dp"
+        android:layout_marginBottom="28dp"
+        app:layout_constraintBottom_toTopOf="@+id/driver_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.894"
+        app:srcCompat="@drawable/driver_rider" />
+</androidx.constraintlayout.widget.ConstraintLayout>

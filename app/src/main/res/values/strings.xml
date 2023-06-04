@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">RideSharing</string>
+    <string name="title_activity_rider_maps">RiderMapsActivity</string>
+    <string name="title_activity_customer_maps">customerMapsActivity</string>
+    <string name="setting">Setting</string>
+    <string name="book_cab_button">Book Cab</string>
+    <string name="logout">logout</string>
+    <string name="logout_button">logout</string>
+    <string name="email">Email......</string>
+    <string name="title_activity_driver_maps">DriverMapsActivity</string>
+</resources>
