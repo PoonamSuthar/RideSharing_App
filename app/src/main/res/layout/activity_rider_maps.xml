@@ -1,58 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#FFEB3B"
     tools:context=".RiderMapsActivity">
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/settings_customer_btn"
+        android:layout_above="@+id/call_a_car_button" />
 
-    <Button
-        android:id="@+id/setting_button"
-        android:layout_width="193dp"
+    <Spinner
+        android:id="@+id/destination"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/settings_customer_btn"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:drawable/btn_dropdown"/>
+
+    <CheckBox
+        android:id="@+id/share_ride_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/destination"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Share Ride"
+        android:textColor="#000000"
+        android:textSize="16sp" />
+    <Button
+        android:id="@+id/call_a_car_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="46dp"
-        android:layout_marginBottom="683dp"
-        android:layout_toStartOf="@+id/Log_out_Button"
-        android:backgroundTint="#F6E54C"
-        android:textColor="#353333"
-        android:text="@string/setting" />
-
-    <Button
-        android:id="@+id/book_cab"
-        android:layout_width="275dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="64dp"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="19dp"
-        android:backgroundTint="#F6E54C"
-        android:text="@string/book_cab_button"
-        android:textColor="#353333"
-        android:textSize="20sp"
+        android:background="#FFEB3B"
+        android:text="Call a CAB"
+        android:textAllCaps="false"
+        android:textColor="#009688"
+        android:textSize="23sp"
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/Log_out_Button"
-        android:layout_width="165dp"
+        android:id="@+id/settings_customer_btn"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="#FFEB3B"
+        android:text="Settings"
+        android:textAllCaps="false"
+        android:textColor="#009688"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/logout_customer_btn"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="3dp"
-        android:layout_marginBottom="683dp"
-        android:textColor="#353333"
-        android:textSize="16sp"
-        android:backgroundTint="#F6E54C"
-        android:text="@string/logout_button" />
+        android:background="#FFEB3B"
+        android:text="Logout"
+        android:textAllCaps="false"
+        android:textColor="#009688"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

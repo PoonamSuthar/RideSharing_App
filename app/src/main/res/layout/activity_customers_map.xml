@@ -1,0 +1,182 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/design_default_color_primary_dark"
+    tools:context="com.example.ridesharing.CustomersMapActivity">
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/settings_customer_btn"
+        android:layout_above="@+id/call_a_car_button"
+        />
+
+
+    <RelativeLayout
+        android:id="@+id/rel1"
+        android:background="@color/design_default_color_primary_dark"
+        android:layout_above="@+id/call_a_car_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:visibility="gone">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_below ="@+id/app_bar_settings"
+
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="131dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginEnd="130dp"
+            android:src="@drawable/profile"
+            app:civ_border_color="#c880ff"
+            app:civ_border_width="2dp" />
+
+        <TextView
+            android:id="@+id/name_driver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Driver Name"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="10dp"
+            />
+
+        <TextView
+            android:id="@+id/phone_driver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Driver Phone Number"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="14dp"
+            android:layout_marginTop="3dp"
+            android:layout_below="@+id/name_driver"
+            android:layout_marginStart="10dp"
+            />
+
+<!--        <TextView-->
+<!--            android:id="@+id/car_name_driver"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+
+<!--            android:text="Driver Car Name"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textSize="14dp"-->
+<!--            android:layout_marginTop="3dp"-->
+<!--            android:layout_below="@+id/phone_driver"-->
+<!--            android:layout_marginStart="10dp"-->
+<!--            />-->
+
+        <RatingBar
+            android:id="@+id/rating_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:numStars="5"
+            android:rating="0"
+            android:stepSize="1" />
+
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/phone"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="15dp"
+            android:layout_centerVertical="true"
+            app:tint="@android:color/black" />
+
+    </RelativeLayout>
+
+
+    <Button
+        android:id="@+id/call_a_car_button"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/design_default_color_primary_dark"
+        android:text="Call a CAB"
+        android:textAllCaps="false"
+        android:textColor="@android:color/background_light"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/Share_a_Ride"
+        android:layout_width="190dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/design_default_color_primary_dark"
+        android:text="Share Ride"
+        android:textAllCaps="false"
+        android:textColor="@android:color/background_light"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+
+    <Button
+        android:id="@+id/settings_customer_btn"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/design_default_color_primary_dark"
+        android:text="Settings"
+        android:textAllCaps="false"
+        android:textColor="@android:color/background_light"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/logout_customer_btn"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/design_default_color_primary_dark"
+        android:text="Logout"
+        android:textAllCaps="false"
+        android:textColor="@android:color/background_light"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        />
+
+    <Spinner
+        android:id="@+id/destination_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/settings_customer_btn"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@android:drawable/btn_dropdown"/>
+
+    <TextView
+        android:id="@+id/total_fare_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/destination_spinner"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+
+        android:text="Total Fare: 0.00" />
+
+</RelativeLayout>
