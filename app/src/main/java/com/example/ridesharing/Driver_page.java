@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class Driver_page extends AppCompatActivity {
 
@@ -26,6 +28,8 @@ public class Driver_page extends AppCompatActivity {
     private EditText driveEmail;
     private EditText driverPassword;
     private FirebaseAuth mAuth;
+    private DatabaseReference DriverDatabaseRef ;
+    private String onlineDriverID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +37,7 @@ public class Driver_page extends AppCompatActivity {
         setContentView(R.layout.activity_driver_page);
 
         mAuth = FirebaseAuth.getInstance();
+
         driver_register_button = (Button) findViewById(R.id.Driver_register);
         driver_login_button = (Button) findViewById(R.id.driver_login);
         driveEmail = (EditText) findViewById(R.id.driver_email);
@@ -89,6 +94,7 @@ public class Driver_page extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Toast.makeText(Driver_page.this, "Driver Login Successfully", Toast.LENGTH_SHORT).show();
 
+
                         Intent DriverIntent = new Intent(Driver_page.this, DriverMapsActivity.class);
                         DriverIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(DriverIntent);
@@ -116,7 +122,15 @@ public class Driver_page extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email_driver, password_driver).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
+                    if (task.isSuccessful())
+                    {
+                        onlineDriverID = mAuth.getCurrentUser().getUid();
+                        DriverDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(onlineDriverID);
+
+                        DriverDatabaseRef.setValue(true);
+                        Intent driverIntent = new Intent(Driver_page.this, DriverMapsActivity.class);
+                        startActivity(driverIntent);
+
                         Toast.makeText(Driver_page.this, "Driver Register Successfully", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(Driver_page.this, "Driver Register Unsuccessfully", Toast.LENGTH_SHORT).show();
