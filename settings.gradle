@@ -3,14 +3,13 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        // Add any additional repositories if needed
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+
+
+
 rootProject.name = "RideSharing"
+
 include ':app'
+// Add more module declarations if needed
