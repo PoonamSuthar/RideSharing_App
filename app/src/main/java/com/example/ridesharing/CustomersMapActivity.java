@@ -39,6 +39,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,6 +48,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -80,6 +83,7 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
     private double fare;
     private int radius = 1;
 
+    private String selectedDestination;
     private Boolean driverFound = false, requestType = false;
     private String driverFoundID;
     private String customerID;
@@ -90,9 +94,11 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
     private ValueEventListener DriverLocationRefListner;
     private boolean fareConfirmationShown = false;
 
-    private TextView txtName, txtPhone, txtCarName, totalFare;
+    private TextView txtName, txtPhone, shareFare, totalFare, textDestination, txtName1, txtPhone1;
     private CircleImageView profilePic;
     private RelativeLayout relativeLayout;
+
+    private RelativeLayout relativeLayout1;
 
 
     String[] destination = {"Airport", "Railway Station", "Paota", "Mandore"};
@@ -104,15 +110,12 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customers_map);
 
-
-
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         customerID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         CustomerDatabaseRef = FirebaseDatabase.getInstance().getReference().child("Customer Requests");
         DriverAvailableRef = FirebaseDatabase.getInstance().getReference().child("Drivers Available");
         DriverLocationRef = FirebaseDatabase.getInstance().getReference().child("Drivers Working");
-
 
         ratingBar = findViewById(R.id.rating_bar);
         Logout = (Button) findViewById(R.id.logout_customer_btn);
@@ -122,10 +125,60 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
         txtName = findViewById(R.id.name_driver);
         txtPhone = findViewById(R.id.phone_driver);
         relativeLayout = findViewById(R.id.rel1);
+        txtName1 = findViewById(R.id.name_ShareCustomer);
+        txtPhone1 = findViewById(R.id.phone_shareCustomer);
+        relativeLayout1 = findViewById(R.id.rel4);
+        textDestination = findViewById(R.id.destination_textview);
+        shareFare = findViewById(R.id.share_fare_textview);
+        shareFare.setVisibility(View.GONE);
+        // Replace with your TextView's ID
 
         // Dropdown list
         destinationSpinner = findViewById(R.id.destination_spinner);
-        destinationSpinner.setOnItemSelectedListener(this);
+        destinationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    String selectedDestination = destination[position];
+                    LatLng destinationLocation = getDestinationLocation(selectedDestination);
+
+                    if (destinationLocation != null) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destinationLocation, 15f));
+
+                        float distance = (float) calculateDistance(iitJodhpurLocation, destinationLocation);
+                        double fare = calculateFare(distance);
+                        Toast.makeText(getApplicationContext(), "Distance to " + selectedDestination + ": " + distance + " km", Toast.LENGTH_LONG).show();
+                        TextView fareTextView = findViewById(R.id.total_fare_textview);
+                        fareTextView.setText("Total Fare: \u20B9" + fare);
+                        fareTextView.setVisibility(View.VISIBLE);
+
+                        String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                        DatabaseReference customerRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(customerId);
+
+                        customerRef.child("destination").setValue(selectedDestination)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        // Destination updated successfully
+                                        String groupKey = FirebaseDatabase.getInstance().getReference().child("Customers").child("Share Cab Customers").push().getKey();
+                                        findCustomersForCabSharing(selectedDestination);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // Failed to update destination
+                                        Toast.makeText(getApplicationContext(), "Failed to update destination", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, destination);
 
@@ -161,10 +214,39 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
         ShareRideButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent Sharing_intent = new Intent(CustomersMapActivity.this, ShareRideMapsActivity.class);
-                startActivity(Sharing_intent);
+                // Update the customer's information in the database
+//                totalFare.setVisibility(View.GONE);
+                DatabaseReference customersRef = FirebaseDatabase.getInstance().getReference("Customers").child("Share Cab Customers");
+                String customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                customersRef.child(customerId).child("wantsToShareCab").setValue(true)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                // Sharing information updated successfully
+                                Toast.makeText(CustomersMapActivity.this, "Cab sharing enabled", Toast.LENGTH_SHORT).show();
+
+                                // Start the ShareRideMapsActivity
+                                ShareRideButton.setVisibility(View.GONE);
+                                CallCabCarButton.setVisibility(View.GONE);
+                                findCustomersForCabSharing(selectedDestination);
+                            }
+                        })
+
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Failed to update sharing information
+//                                Toast.makeText(CustomersMapActivity.this, "Failed to enable cab sharing", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
             }
+
+
         });
+
+
 
         // CAll cab button Activity
         CallCabCarButton.setOnClickListener(new View.OnClickListener() {
@@ -223,7 +305,6 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
                 }
             }
         });
-
 
     }
 
@@ -330,6 +411,8 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
                 });
             }
 
+
+
             @Override
             public void onKeyExited(String key) {
                 // Handle the driver exit event if needed
@@ -360,20 +443,6 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
             }
         });
     }
-
-//    private void bookCab() {
-//
-//
-////        totalFare = findViewById(R.id.total_fare_textview);
-//
-//
-//        if (destinationLocation != null) {
-//            float distance = (float) calculateDistance(iitJodhpurLocation, destinationLocation);
-//            fare = calculateFare(distance);
-//
-//        }
-//    }
-
 
     //and then we get to the driver location - to tell customer where is the driver
     private void GettingDriverLocation()
@@ -473,7 +542,84 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
                 });
     }
 
+    private void findCustomersForCabSharing(String selectedDestination) {
+        DatabaseReference shareCustomersRef = FirebaseDatabase.getInstance().getReference("Customers").child("Share Cab Customers");
+        double totalFare = 250.0; // Total fare for the trip
+        double customerFare = 101.0; // Fare to be paid by the customer
 
+        String totalFareText = "Total Fare: \u20B9" + totalFare;
+        String customerFareText = "You have to pay: \u20B9" + customerFare;
+
+        // Query customers who want to share a cab
+        Query query = shareCustomersRef.orderByChild("wantsToShareCab").equalTo(true);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<String> customerIds = new ArrayList<>();
+
+                // Iterate through the customers who want to share a cab
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String customerId = snapshot.getKey();
+                    customerIds.add(customerId);
+                }
+
+                // Check if there are at least two customers willing to share a cab
+                if (customerIds.size() >= 2) {
+                    // Assign two customers to a group
+                    relativeLayout1.setVisibility(View.VISIBLE);
+                    String groupKey = FirebaseDatabase.getInstance().getReference().child("Groups").push().getKey();
+                    DatabaseReference groupRef = FirebaseDatabase.getInstance().getReference().child("Groups").child(groupKey);
+
+                    for (String customerId : customerIds) {
+                        groupRef.child(customerId).setValue(true);
+                    }
+
+                    DatabaseReference customersRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers");
+                    for (String customerId : customerIds) {
+                        customersRef.child(customerId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                // Retrieve the customer information
+                                String customerName = dataSnapshot.child("name").getValue(String.class);
+                                String customerPhone = dataSnapshot.child("phone").getValue(String.class);
+                                String customerDestination = dataSnapshot.child("destination").getValue(String.class);
+
+                                // Update the corresponding TextViews with customer information
+                                txtName1.setText(customerName);
+                                txtPhone1.setText(customerPhone);
+                                textDestination.setText(customerDestination);
+                                shareFare.setText(totalFareText + "\n" + customerFareText);
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                // Handle the error if needed
+                            }
+                        });
+                    }
+
+                    // Make the "Call Cab" button visible
+                    CallCabCarButton.setVisibility(View.VISIBLE);
+                    shareFare.setVisibility(View.VISIBLE);
+
+
+                } else {
+                    Toast.makeText(CustomersMapActivity.this, "Not enough customers for cab sharing", Toast.LENGTH_SHORT).show();
+                    relativeLayout1.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle the error if needed
+            }
+        });
+
+        DatabaseReference CustomersRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers");
+
+        }
 
 
     @Override
@@ -578,7 +724,6 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
             }
         });
 
-
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
@@ -591,13 +736,7 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
 
                     txtName.setText(name);
                     txtPhone.setText(phone);
-//                    txtCarName.setText(car);
 
-//                    if (dataSnapshot.hasChild("image"))
-//                    {
-//                        String image = dataSnapshot.child("image").getValue().toString();
-//                        Picasso.get().load(image).into(profilePic);
-//                    }
                 }
             }
 
@@ -608,20 +747,6 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
         });
     }
 
-//    private void bookCab() {
-//        String selectedDestination = destinationSpinner.getSelectedItem().toString();
-//        LatLng destinationLocation = getDestinationLocation(selectedDestination);
-//
-//        if (destinationLocation != null) {
-//            float distance = (float) calculateDistance(iitJodhpurLocation, destinationLocation);
-//            double fare = calculateFare(distance);
-//
-////            Intent intent = new Intent(RiderMapsActivity.this, FareActivity.class);
-////            intent.putExtra("distance", distance);
-////            intent.putExtra("fare", fare);
-////            startActivity(intent);
-//        }
-//    }
 
     private double calculateDistance(LatLng origin, LatLng destination) {
         if (origin == null || destination == null) {
@@ -662,24 +787,6 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
         return fare;
     }
 
-    @Override
-
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String selectedDestination = destination[position];
-        LatLng destinationLocation = getDestinationLocation(selectedDestination);
-
-        if (destinationLocation != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destinationLocation, 15f));
-
-            float distance = (float) calculateDistance(iitJodhpurLocation, destinationLocation);
-            double fare = calculateFare(distance);
-
-            Toast.makeText(getApplicationContext(), "Distance to " + selectedDestination + ": " + distance + " km", Toast.LENGTH_LONG).show();
-            TextView fareTextView = findViewById(R.id.total_fare_textview);
-            fareTextView.setText("Total Fare: \u20B9" + fare);
-            fareTextView.setVisibility(View.VISIBLE);
-        }
-    }
 
 
     private LatLng getDestinationLocation(String destination) {
@@ -698,6 +805,10 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
     }
 
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
@@ -705,3 +816,31 @@ public class CustomersMapActivity extends FragmentActivity implements OnMapReady
     }
 }
 
+
+////
+//Query newQuery = customersRef.orderByChild("name").equalTo("poonam");
+//            newQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//@Override
+//public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//        // Check if the query result has any matching customers
+//        if (dataSnapshot.exists()) {
+//        // Loop through the matching customers (should be only one in this case)
+//        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//        String customerId = snapshot.getKey();
+//
+//        // Get the customer details
+//        String customerName = snapshot.child("name").getValue(String.class);
+//        String customerPhone = snapshot.child("phone").getValue(String.class);
+//        String destination = "Mandore"; // Set the destination as Mandore
+//
+//        // Update the TextView with the customer details
+//        textView.setText("Name: " + customerName + "\nPhone: " + customerPhone + "\nDestination: " + destination);
+//        }
+//        }
+//        }
+//
+//@Override
+//public void onCancelled(@NonNull DatabaseError databaseError) {
+//        // Handle the error if needed
+//        }
+//        });
